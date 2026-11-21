@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Raw CSV data tracked by DVC
+data/raw/train.csv
+data/raw/later.csv
+
+# Environment & build
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# DVC cache
+.dvc/cache
+.dvc/tmp/lock
+.dvc/tmp/rwlock
+.dvc/tmp/rwlock.lock

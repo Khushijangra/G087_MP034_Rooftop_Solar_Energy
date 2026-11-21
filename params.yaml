@@ -1,0 +1,46 @@
+base:
+  project_name: "MP034-Solar-Energy-Indore"
+  random_state: 42
+
+data:
+  raw_train_path: "data/raw/train.csv"
+  raw_later_path: "data/raw/later.csv"
+  raw_holdout_path: "data/raw/holdout_features.csv"
+  cleaned_train_path: "data/cleaned_train.csv"
+  unit_mixup_factor: 10000
+  target_typo_threshold: 100.0
+
+model:
+  target_col: "energy_kwh"
+  numeric_features:
+    - "panel_area_m2"
+    - "sunshine_hours"
+    - "temp_c"
+    - "dust_days"
+    - "panel_age_yr"
+    - "cloud_cover_pct"
+  categorical_features:
+    - "roof_type"
+    - "area"
+  models:
+    ridge:
+      alpha: 1.0
+    random_forest:
+      n_estimators: 100
+      max_depth: 8
+      min_samples_split: 4
+    gradient_boosting:
+      n_estimators: 120
+      learning_rate: 0.08
+      max_depth: 4
+
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  experiment_name: "G087_Solar_Energy"
+  registered_model_name: "mp034-solar-model"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  max_temp_c: 75.0
+  min_panel_age_yr: 0.0
