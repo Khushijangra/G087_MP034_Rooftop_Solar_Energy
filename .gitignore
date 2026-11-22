@@ -1,10 +1,9 @@
-# Python
+# Python cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# Raw CSV data tracked by DVC
+# Raw CSV data tracked by DVC (never commit raw datasets directly)
 data/raw/train.csv
 data/raw/later.csv
 
@@ -14,8 +13,18 @@ venv/
 env/
 .pytest_cache/
 
-# DVC cache
-.dvc/cache
-.dvc/tmp/lock
-.dvc/tmp/rwlock
-.dvc/tmp/rwlock.lock
+# Local MLflow run artifacts (mlflow.db is tracked per handbook)
+mlruns/
+mlartifacts/
+
+# DVC cache & runtime temp
+.dvc/cache/
+.dvc/tmp/
+
+# Environment secrets & local configs
+.env
+.env.*
+
+# IDE files
+.vscode/
+.idea/
