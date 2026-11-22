@@ -154,3 +154,27 @@ d83d725 | Harsh Chaudhary (Ops Lead)    | feat(ops): add CI workflow, Kubernetes
 **STATUS: READY FOR SUBMISSION (Pending GitHub Remote URL)**
 
 The codebase is fully tested, hardened, reproducible, and ready for immediate deployment.
+
+## Phase 4 — GitHub Publication & Live Verification
+
+- **Publication Date:** 22 November 2026
+- **Repository Name:** `G087_MP034_Rooftop_Solar_Energy`
+- **Official Public Repository URL:** [https://github.com/Khushijangra/G087_MP034_Rooftop_Solar_Energy](https://github.com/Khushijangra/G087_MP034_Rooftop_Solar_Energy)
+- **Repository Visibility:** **Public**
+- **Default Branch:** `main`
+- **Remote Configuration:** `origin -> https://github.com/Khushijangra/G087_MP034_Rooftop_Solar_Energy.git`
+- **Latest Commit Hash (Local & Remote Synchronized):** `8aa5b08fc16faeabf87d1836f9a6d3b08637a0ca`
+- **All 7 Group Contribution Commits Preserved on GitHub:**
+  1. `8aa5b08` — docs: add Phase 3 final submission verification report (Khushi Jangra)
+  2. `2356206` — docs: add Phase 2 verification and reproducibility report (Khushi Jangra)
+  3. `e3505f6` — chore(git): add mlruns, dvc tmp, and IDE ignore rules (Khushi Jangra)
+  4. `d83d725` — feat(ops): add CI workflow, Kubernetes manifests, drift monitoring and holdout predictions (Harsh Chaudhary)
+  5. `2a2b1dd` — feat(api): implement prediction service with validation and Dockerfile (Jaanvi Mutreja)
+  6. `0a3c1b9` — feat(model): add MLflow experiment tracking and model registry (Krishna Yadav)
+  7. `9241bd3` — feat(data): implement data quality investigation and DVC tracking (Khushi Jangra)
+- **Live GitHub Actions CI Status:**
+  - **Run ID:** `45012386305`
+  - **Workflow Name:** `CI Pipeline`
+  - **Execution Result:** **`SUCCESS` (Green Tick)**
+  - **Run Duration:** 1m 4s on `ubuntu-latest` (Python 3.12)
+  - **Automated Test Results on GitHub Runner:** `8 passed in 1.52s`
