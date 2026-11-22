@@ -1,62 +1,53 @@
-# MP034 findings --- fill in every value, keep every key.
-# The marking tool reads this file. Write null only where the comment says so.
-# Use the exact column names and group values from your data files.
-
-group_id: "G087"          # your group id, e.g. "G042"
-problem_id: "MP034"
-
+group_id: G087
+problem_id: MP034
 data_issues:
-  # For each of the 7 kinds: present: true or false.
-  # If present is false, leave the other values as null.
   leaking_column:
     present: false
-    column: null           # the column that must not be used as a feature
+    column: null
   unit_mixup:
     present: true
-    column: "panel_area_m2" # the column recorded in a different unit
-    group_value: "New Colony" # the value of area whose rows are affected
-    factor: 10000          # wrong value = right value x factor
+    column: panel_area_m2
+    group_value: New Colony
+    factor: 10000
   sentinel_value:
     present: false
     column: null
-    value: null            # the special number typed instead of a blank
-    count: null            # how many rows have it
+    value: null
+    count: null
   duplicate_rows:
     present: false
-    count: null            # number of EXTRA copies (rows you would delete)
+    count: null
   stuck_sensor:
     present: true
-    column: "cloud_cover_pct"
-    start_date: "2026-03-06" # first date with the stuck value, YYYY-MM-DD
-    end_date: "2026-03-19"   # last date with the stuck value, YYYY-MM-DD
+    column: cloud_cover_pct
+    start_date: '2026-03-06'
+    end_date: '2026-03-19'
   target_typos:
     present: true
-    count: 9               # rows whose target was typed 10 times too big
+    count: 9
   spelling_variants:
     present: true
-    column: "roof_type"
-    true_levels: 3         # how many real categories there are after cleaning
-
+    column: roof_type
+    true_levels: 3
 tracking:
-  experiment_name: null
-  best_run_id: null        # the MLflow run id of your v1 model
-  registered_model_name: null
-  champion_version: null
-
+  experiment_name: G087_Solar_Energy
+  best_run_id: 68ec63a1f2ba4909920609e227e0bfe1
+  registered_model_name: mp034-solar-model
+  champion_version: 2
 monitoring:
-  psi:                     # cleaned train.csv vs later.csv, 10 bins
-    panel_area_m2: null
-    sunshine_hours: null
-    temp_c: null
-    dust_days: null
-    panel_age_yr: null
-    cloud_cover_pct: null
-  most_drifted_feature: null
-  mae_by_group:            # v1 on later.csv, per value of area
-    'Old City': null
-    'New Colony': null
-    'Industrial': null
-  worst_served_group: null
-  mae_v1_on_check: null    # v1 on the last 30% of later.csv (by date)
-  mae_v2_on_check: null    # v2 on the same rows
-  decision: null           # promote or keep
+  psi:
+    panel_area_m2: 0.0341
+    sunshine_hours: 0.0567
+    temp_c: 3.6698
+    dust_days: 0.0376
+    panel_age_yr: 0.0515
+    cloud_cover_pct: 0.083
+  most_drifted_feature: temp_c
+  mae_by_group:
+    Old City: 3.4553
+    New Colony: 7.0469
+    Industrial: 3.2493
+  worst_served_group: New Colony
+  mae_v1_on_check: 4.6934
+  mae_v2_on_check: 4.1535
+  decision: promote
