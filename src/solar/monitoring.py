@@ -19,7 +19,24 @@ from src.solar.train import build_pipeline, get_data_sha256
 def compute_psi(
     expected: np.ndarray, actual: np.ndarray, num_bins: int = 10
 ) -> float:
-    """Compute Population Stability Index (PSI) with 10 bins."""
+    """Compute Population Stability Index with validated numeric inputs."""
+    expected = np.asarray(expected, dtype=float)
+    actual = np.asarray(actual, dtype=float)
+
+    if expected.ndim != 1 or actual.ndim != 1:
+        raise ValueError("PSI inputs must be one-dimensional")
+
+    if expected.size == 0 or actual.size == 0:
+        raise ValueError("PSI inputs cannot be empty")
+
+    if not np.isfinite(expected).all() or not np.isfinite(actual).all():
+        raise ValueError("PSI inputs must contain only finite values")
+
+    if isinstance(num_bins, (bool, np.bool_)) or not isinstance(
+        num_bins, (int, np.integer)
+    ) or num_bins < 2:
+        raise ValueError("num_bins must be an integer >= 2")
+
     quantiles = np.linspace(0, 100, num_bins + 1)
     bin_edges = np.percentile(expected, quantiles)
     bin_edges[0] = -np.inf
@@ -32,7 +49,6 @@ def compute_psi(
     expected_pct = expected_counts / len(expected)
     actual_pct = actual_counts / len(actual)
 
-    # Avoid zero division
     expected_pct = np.where(expected_pct == 0, 0.0001, expected_pct)
     actual_pct = np.where(actual_pct == 0, 0.0001, actual_pct)
 
@@ -40,7 +56,6 @@ def compute_psi(
         (actual_pct - expected_pct) * np.log(actual_pct / expected_pct)
     )
     return float(round(psi_val, 4))
-
 
 def run_monitoring_and_retraining():
     tracking_uri = "sqlite:///mlflow.db"
