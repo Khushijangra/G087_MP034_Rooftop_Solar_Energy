@@ -1,3 +1,5 @@
+from src.solar.train import get_data_sha256
+from pathlib import Path
 import numpy as np
 import pytest
 
@@ -30,3 +32,33 @@ def test_invalid_mae_raises_error():
 
     with pytest.raises(ValueError):
         select_best_run(runs)
+def test_dataset_hash_is_64_characters(tmp_path):
+    data_file = tmp_path / "train.csv"
+    data_file.write_text("solar,power\n1,100\n")
+
+    result = get_data_sha256(str(data_file))
+
+    assert len(result) == 64
+    assert all(c in "0123456789abcdef" for c in result)
+
+
+def test_same_dataset_produces_same_hash(tmp_path):
+    data_file = tmp_path / "train.csv"
+    data_file.write_text("solar,power\n1,100\n")
+
+    first_hash = get_data_sha256(str(data_file))
+    second_hash = get_data_sha256(str(data_file))
+
+    assert first_hash == second_hash
+
+
+def test_modified_dataset_produces_different_hash(tmp_path):
+    data_file = tmp_path / "train.csv"
+    data_file.write_text("solar,power\n1,100\n")
+
+    first_hash = get_data_sha256(str(data_file))
+
+    data_file.write_text("solar,power\n2,200\n")
+    second_hash = get_data_sha256(str(data_file))
+
+    assert first_hash != second_hash
