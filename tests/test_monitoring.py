@@ -1,7 +1,44 @@
 import numpy as np
 import pytest
+from pathlib import Path
 
+import joblib
+import pandas as pd
 from src.solar.monitoring import compute_psi
+from src.solar.clean import clean_features
+
+ROOT = Path(__file__).resolve().parents[1]
+
+HOLDOUT_FEATURES = [
+    "panel_area_m2",
+    "sunshine_hours",
+    "temp_c",
+    "dust_days",
+    "panel_age_yr",
+    "cloud_cover_pct",
+    "roof_type",
+    "area",
+]
+
+
+def test_holdout_predictions_reproduce_from_champion():
+    holdout = pd.read_csv(ROOT / "data/raw/holdout_features.csv")
+    saved = pd.read_csv(ROOT / "predictions/holdout_predictions.csv")
+    model = joblib.load(ROOT / "models/model.joblib")
+
+    regenerated = model.predict(clean_features(holdout)[HOLDOUT_FEATURES])
+
+    assert list(saved.columns) == ["record_id", "prediction"]
+    assert saved["record_id"].tolist() == holdout["record_id"].tolist()
+
+    np.testing.assert_allclose(
+        saved["prediction"].to_numpy(),
+        regenerated,
+        rtol=1e-10,
+        atol=1e-10,
+    )
+
+
 
 
 def test_psi_identical_distributions():
