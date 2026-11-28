@@ -155,3 +155,12 @@ def predict(request: PredictionRequest):
     logger.info(json.dumps(log_record))
 
     return PredictionResponse(prediction=pred_val)
+@app.get("/ready")
+def readiness():
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Model not ready",
+        )
+
+    return {"status": "ready"}

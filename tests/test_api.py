@@ -157,3 +157,29 @@ def test_nonfinite_prediction(valid_payload, monkeypatch, value):
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Prediction failed"}
+    
+def test_readiness_when_model_loaded(monkeypatch):
+    monkeypatch.setattr(api_module, "model", Mock())
+
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
+def test_readiness_when_model_unavailable(monkeypatch):
+    monkeypatch.setattr(api_module, "model", None)
+
+    response = client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Model not ready"}
+
+
+def test_health_remains_available_without_model(monkeypatch):
+    monkeypatch.setattr(api_module, "model", None)
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
