@@ -4,6 +4,7 @@ Authored by Jaanvi Mutreja (Service Lead) & Harsh Chaudhary (Ops Lead).
 
 import json
 import logging
+import math
 from pathlib import Path
 import sys
 from typing import Literal
@@ -12,7 +13,6 @@ import joblib
 import pandas as pd
 from pydantic import BaseModel, Field
 
-# Setup JSON structured logger per Section 9
 logger = logging.getLogger("mp034_api")
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
@@ -32,17 +32,24 @@ model = None
 @app.on_event("startup")
 def load_model():
     global model
-    if MODEL_PATH.exists():
+    try:
         model = joblib.load(MODEL_PATH)
-    else:
-        logger.error(
-            json.dumps({"event": "model_load_failure", "path": str(MODEL_PATH)})
-        )
+    except Exception as exc:
+        model = None
+        logger.error(json.dumps({
+            "event": "model_load_failure",
+            "path": str(MODEL_PATH),
+            "error_type": type(exc).__name__,
+        }))
 
 
 class PredictionRequest(BaseModel):
-    panel_area_m2: float = Field(..., description="panel area in m2")
-    sunshine_hours: float = Field(..., description="hours of bright sunshine")
+    panel_area_m2: float = Field(
+        ..., description="panel area in m2"
+    )
+    sunshine_hours: float = Field(
+        ..., description="hours of bright sunshine"
+    )
     temp_c: float = Field(
         ..., le=75.0, description="maximum temperature (max 75 C)"
     )
@@ -56,7 +63,9 @@ class PredictionRequest(BaseModel):
         ..., ge=0.0, le=100.0, description="cloud cover percentage"
     )
     roof_type: Literal[
-        "flat", "tin", "sloped", "Flat", "Tin", "Sloped", "FLAT", "TIN", "SLOPED"
+        "flat", "tin", "sloped",
+        "Flat", "Tin", "Sloped",
+        "FLAT", "TIN", "SLOPED"
     ] = Field(..., description="roof type")
     area: Literal["Old City", "New Colony", "Industrial"] = Field(
         ..., description="area of Indore"
@@ -75,17 +84,23 @@ def health():
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest):
     global model
+
     if model is None:
-        if MODEL_PATH.exists():
+        try:
             model = joblib.load(MODEL_PATH)
-        else:
+        except Exception as exc:
+            logger.error(json.dumps({
+                "event": "model_load_failure",
+                "path": str(MODEL_PATH),
+                "error_type": type(exc).__name__,
+            }))
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Model not loaded",
             )
 
-    # Normalize roof_type
     roof_clean = request.roof_type.strip().lower().rstrip(".")
+
     if roof_clean in ["fla"]:
         roof_clean = "flat"
     elif roof_clean in ["slo"]:
@@ -106,9 +121,22 @@ def predict(request: PredictionRequest):
         ]
     )
 
-    pred_val = float(model.predict(input_data)[0])
+    try:
+        pred_val = float(model.predict(input_data)[0])
 
-    # Structured JSON log (NO customer personal information)
+        if not math.isfinite(pred_val):
+            raise ValueError("Non-finite prediction")
+
+    except Exception as exc:
+        logger.error(json.dumps({
+            "event": "prediction_failure",
+            "error_type": type(exc).__name__,
+        }))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Prediction failed",
+        )
+
     log_record = {
         "event": "prediction",
         "inputs": {
@@ -123,6 +151,16 @@ def predict(request: PredictionRequest):
         },
         "prediction_energy_kwh": pred_val,
     }
+
     logger.info(json.dumps(log_record))
 
     return PredictionResponse(prediction=pred_val)
+@app.get("/ready")
+def readiness():
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Model not ready",
+        )
+
+    return {"status": "ready"}
